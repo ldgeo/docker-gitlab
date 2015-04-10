@@ -30,6 +30,14 @@ COPY assets/config/ /app/setup/config/
 COPY assets/init /app/init
 RUN chmod 755 /app/init
 
+COPY oslandia /app/
+
+RUN cp -rf /app/gitlabhq/images/* /home/git/gitlab/app/assets/images/ && \
+cp -rf /app/gitlabhq/layouts/* /home/git/gitlab/app/views/layouts/ && \
+cp -rf /app/gitlabhq/notify/* /home/git/gitlab/app/views/notify/ && \
+chown -R git:git /home/git/gitlab/app/views/ && \
+chown -R git:git /home/git/gitlab/app/assets/images/
+
 EXPOSE 22
 EXPOSE 80
 EXPOSE 443
