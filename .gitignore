@@ -1,2 +1,12 @@
+# Archives and bundles
 *.gem
 *.tar.gz
+
+# Temp files
+*.swp
+*.swo
+*~
+
+# Useless junk
+.directory
+
