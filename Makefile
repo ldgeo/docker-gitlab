@@ -27,11 +27,11 @@ quickstart:
 
 stop:
 	@echo "Stopping gitlab..."
-	@docker stop gitlab-demo >/dev/null
+	@docker stop gitlab-oslandia >/dev/null
 
 purge: stop
 	@echo "Removing stopped container..."
-	@docker rm gitlab-demo >/dev/null
+	@docker rm gitlab-oslandia >/dev/null
 
 logs:
-	@docker logs -f gitlab-demo
+	@docker logs -f gitlab-oslandia
