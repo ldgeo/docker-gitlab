@@ -1,0 +1,35 @@
+!!! 5
+%html{ lang: "en"}
+  = render "layouts/head"
+  %body.ui_mars.login-page.application
+    = render "layouts/public_head_panel", title: ''
+    .container.navless-container
+      .content
+        = render "layouts/flash"
+        .row.prepend-top-20
+          .col-sm-5.pull-right
+            = yield
+          .col-sm-7.brand-holder.pull-left
+            %h1
+              Oslandia
+            %h3
+              Project platform / Plateforme projet
+            %p
+              = image_tag 'oslandia_logo_medium.png'
+            %p
+              This is the project management platform for Oslandia's teams and collaborators.
+              Oslandia provides software support and development services.
+              Get in touch if you need information at infos@oslandia.com
+            %p
+              Vous êtes sur la plateforme de gestion de projet d'Oslandia et de ses collaborateurs.
+              Oslandia fournit des services en support logiciel et en développement.
+              Contactez nous si vous souhaitez plus d'information à infos@oslandia.com
+
+            - if extra_sign_in_text.present?
+              = markdown(extra_sign_in_text)
+
+    %hr
+    .container
+      .footer-links
+        = link_to "Documentation", "http://doc.gitlab.com/ce/"
+        = link_to "About Oslandia", "http://www.oslandia.com"
