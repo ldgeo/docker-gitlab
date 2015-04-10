@@ -1,0 +1,26 @@
+%p
+  Bonjour #{@user.name}!
+%p
+  Ceci est un message de la plateforme de gestion de projet d'Oslandia.
+%p
+  Une nouvelle adresse email vient d'être ajoutée à votre compte.
+%p
+  email:
+  %code= @email.email
+%p
+  Si ceci vous a été envoyé par erreur, vous pouvez le modifier ici : 
+  = link_to "Emails", profile_emails_url
+%p
+  ----------------------------------------------
+%p
+  Hi #{@user.name}!
+%p
+  This is a message from Oslandia's project management platform.
+%p
+  A new email was added to your account:
+%p
+  email:
+  %code= @email.email
+%p
+  If this email was added in error, you can remove it here:
+  = link_to "Emails", profile_emails_url
