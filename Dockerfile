@@ -35,7 +35,11 @@ COPY oslandia /app/
 RUN cp -rf /app/gitlabhq/images/* /home/git/gitlab/app/assets/images/ && \
 cp -rf /app/gitlabhq/layouts/* /home/git/gitlab/app/views/layouts/ && \
 cp -rf /app/gitlabhq/notify/* /home/git/gitlab/app/views/notify/ && \
+cp -rf /app/gitlabhq/helpers/* /home/git/gitlab/app/helpers/ && \
+cp -rf /app/gitlabhq/views/projects/* /home/git/gitlab/app/views/projects/ && \
 chown -R git:git /home/git/gitlab/app/views/ && \
+chown -R git:git /home/git/gitlab/app/helpers/ && \
+chown -R git:git /home/git/gitlab/app/views/projects/ && \
 chown -R git:git /home/git/gitlab/app/assets/images/
 
 EXPOSE 22
