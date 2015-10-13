@@ -42,6 +42,29 @@ COPY assets/config/ ${SETUP_DIR}/config/
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 
+# add oslandia customizations
+COPY oslandia /app/
+
+RUN cp -rf /app/appearances_helper.rb /home/git/gitlab/app/helpers/ && \
+cp -rf /app/oslandia.png /home/git/gitlab/app/assets/images/ && \
+cp -rf /app/big_oslandia.svg /home/git/gitlab/app/assets/images/ && \
+cp -rf /app/new_user_email.html.haml /home/git/gitlab/app/views/notify/ && \
+cp -rf /app/new_email_email.text.erb /home/git/gitlab/app/views/notify/ && \
+cp -rf /app/new_email_email.text.erb /home/git/gitlab/app/views/notify/ && \
+cp -rf /app/new_email_email.html.haml /home/git/gitlab/app/views/notify/ && \
+cp -rf /app/notify.html.haml /home/git/gitlab/app/views/layouts/ && \
+cp -rf /app/_home_panel.html.haml /home/git/gitlab/app/views/projects/ && \
+cp -rf /app/_project.html.haml /home/git/gitlab/app/views/layouts/nav/ && \
+cp -rf /app/show.html.haml /home/git/gitlab/app/views/projects/ && \
+cp -rf /app/reset_password_instructions.html.erb /home/git/gitlab/app/views/devise/mailer/ && \
+cp -rf /app/confirmation_instructions.html.erb /home/git/gitlab/app/views/devise/mailer/ && \
+chown -R git:git /home/git/gitlab/app/assets/images/ && \
+chown -R git:git /home/git/gitlab/app/helpers/ && \
+chown -R git:git /home/git/gitlab/app/views/notify/ && \
+chown -R git:git /home/git/gitlab/app/views/layouts/ && \
+chown -R git:git /home/git/gitlab/app/views/projects/ && \
+chown -R git:git /home/git/gitlab/app/views/devise/mailer/
+
 EXPOSE 22/tcp 80/tcp 443/tcp
 
 VOLUME ["${GITLAB_DATA_DIR}", "${GITLAB_LOG_DIR}"]

@@ -1,0 +1,43 @@
+%p
+  Bonjour #{@user['name']}!
+
+%p
+  Ceci est un message de la plateforme de gestion de projet d'Oslandia.
+%p
+  Un administrateur de la plateforme vous a créé un compte. Vous pouvez désormais vous connecter sur l'application GitLab et interagir avec nos équipes.
+%p
+  Votre login est :
+%p
+  %code= @user['email']
+%p
+  Cliquez sur le lien suivant pour créer votre mot de passe :
+
+- if @user.created_by_id
+  %p
+    = link_to "Click here to set your password", edit_password_url(@user, reset_password_token: @token)
+  %p
+    = raw reset_token_expire_message
+%p
+  N'hésitez pas à nous contacter si vous avez des soucis d'utilisation ou de connexion. Un projet spécifique d'aide est disponible sur la plateforme, ou vous pouvez envoyer un mail à support (at) oslandia.com si vous ne pouvez pas vous connecter.
+%p
+  \---------------------------------------------------------
+%p
+  Hi #{@user['name']}!
+%p
+  This is a message from Oslandia's project management platform.
+%p
+  The platform Administrator created an account for you. You can now login on the GitLab application and interact with our team.
+%p
+  Your login is :
+%p
+  %code= @user['email']
+%p
+  You can click on the following link to set your password :
+
+- if @user.created_by_id
+  %p
+    = link_to "Click here to set your password", edit_password_url(@user, reset_password_token: @token)
+  %p
+    = raw reset_token_expire_message
+%p
+  Do not hesitate to contact us if you have connection issues or difficulties using the platform. A specific help project is available for enquiries about the platform itself, or you can send an email at support (at) oslandia.com if you cannot login.
