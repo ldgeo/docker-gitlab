@@ -46,7 +46,6 @@ RUN chmod 755 /sbin/entrypoint.sh
 COPY oslandia /app/
 
 RUN cp -rf /app/appearances_helper.rb /home/git/gitlab/app/helpers/ && \
-cp -rf /app/oslandia.png /home/git/gitlab/app/assets/images/ && \
 cp -rf /app/big_oslandia.svg /home/git/gitlab/app/assets/images/ && \
 cp -rf /app/new_user_email.html.haml /home/git/gitlab/app/views/notify/ && \
 cp -rf /app/new_email_email.text.erb /home/git/gitlab/app/views/notify/ && \
