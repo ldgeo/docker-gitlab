@@ -836,9 +836,6 @@ chown ${GITLAB_USER}:${GITLAB_USER} ${GITLAB_BUILDS_DIR}
 rm -rf builds
 ln -sf ${GITLAB_BUILDS_DIR} builds
 
-# remove old cache directory (remove this line after a few releases)
-rm -rf ${GITLAB_DATA_DIR}/cache
-
 # create the backups directory
 mkdir -p ${GITLAB_BACKUP_DIR}
 chown ${GITLAB_USER}:${GITLAB_USER} ${GITLAB_BACKUP_DIR}
@@ -868,15 +865,31 @@ appInit () {
       ;;
   esac
   timeout=60
-  printf "Waiting for database server to accept connections"
+  echo -n "Waiting for database server to accept connections"
   while ! ${prog} >/dev/null 2>&1
   do
     timeout=$(expr $timeout - 1)
     if [[ $timeout -eq 0 ]]; then
-      printf "\nCould not connect to database server. Aborting...\n"
+      echo
+      echo "Could not connect to database server. Aborting..."
       exit 1
     fi
-    printf "."
+    echo -n "."
+    sleep 1
+  done
+  echo
+
+  timeout=60
+  echo -n "Waiting for redis server to accept connections"
+  while ! redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping >/dev/null 2>&1
+  do
+    timeout=$(expr $timeout - 1)
+    if [[ $timeout -eq 0 ]]; then
+      echo ""
+      echo "Could not connect to redis server. Aborting..."
+      exit 1
+    fi
+    echo -n "."
     sleep 1
   done
   echo
@@ -899,8 +912,8 @@ appInit () {
 
   # migrate database and compile the assets if the gitlab version or relative_url has changed.
   CACHE_VERSION=
-  [[ -f tmp/cache/VERSION ]] && CACHE_VERSION=$(cat tmp/cache/VERSION)
-  [[ -f tmp/cache/GITLAB_RELATIVE_URL_ROOT ]] && CACHE_GITLAB_RELATIVE_URL_ROOT=$(cat tmp/cache/GITLAB_RELATIVE_URL_ROOT)
+  [[ -f ${GITLAB_DATA_DIR}/tmp/VERSION ]] && CACHE_VERSION=$(cat ${GITLAB_DATA_DIR}/tmp/VERSION)
+  [[ -f ${GITLAB_DATA_DIR}/tmp/GITLAB_RELATIVE_URL_ROOT ]] && CACHE_GITLAB_RELATIVE_URL_ROOT=$(cat ${GITLAB_DATA_DIR}/tmp/GITLAB_RELATIVE_URL_ROOT)
   if [[ ${GITLAB_VERSION} != ${CACHE_VERSION} || ${GITLAB_RELATIVE_URL_ROOT} != ${CACHE_GITLAB_RELATIVE_URL_ROOT} ]]; then
     echo "Migrating database..."
     sudo -HEu ${GITLAB_USER} bundle exec rake db:migrate >/dev/null
@@ -908,17 +921,13 @@ appInit () {
     # recreate the tmp directory
     rm -rf ${GITLAB_DATA_DIR}/tmp
     sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/
-    chmod -R u+rwX ${GITLAB_DATA_DIR}/tmp/
 
-    # create the tmp/cache and tmp/public/assets directory
-    sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/cache/
-    sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/public/assets/
+    # clear the cache
+    sudo -HEu ${GITLAB_USER} bundle exec rake cache:clear >/dev/null 2>&1
 
-    echo "Compiling assets. Please be patient, this could take a while..."
-    sudo -HEu ${GITLAB_USER} bundle exec rake assets:clean assets:precompile cache:clear >/dev/null 2>&1
-    sudo -HEu ${GITLAB_USER} touch tmp/cache/VERSION
-    sudo -HEu ${GITLAB_USER} echo "${GITLAB_VERSION}" > tmp/cache/VERSION
-    sudo -HEu ${GITLAB_USER} echo "${GITLAB_RELATIVE_URL_ROOT}" > tmp/cache/GITLAB_RELATIVE_URL_ROOT
+    # update VERSION information
+    sudo -HEu ${GITLAB_USER} echo "${GITLAB_VERSION}" > ${GITLAB_DATA_DIR}/tmp/VERSION
+    sudo -HEu ${GITLAB_USER} echo "${GITLAB_RELATIVE_URL_ROOT}" > ${GITLAB_DATA_DIR}/tmp/GITLAB_RELATIVE_URL_ROOT
   fi
 
   # remove stale unicorn and sidekiq pid's if they exist.
@@ -982,10 +991,6 @@ appSanitize () {
   find ${GITLAB_DATA_DIR}/uploads -type d -not -path ${GITLAB_DATA_DIR}/uploads -exec chmod 0755 {} \;
   chmod 0750 ${GITLAB_DATA_DIR}/uploads/
   chown ${GITLAB_USER}:${GITLAB_USER} ${GITLAB_DATA_DIR}/uploads/
-
-  echo "Checking tmp directory permissions..."
-  chmod -R u+rwX ${GITLAB_DATA_DIR}/tmp/
-  chown ${GITLAB_USER}:${GITLAB_USER} -R ${GITLAB_DATA_DIR}/tmp/
 
   echo "Creating gitlab-shell hooks..."
   sudo -HEu ${GITLAB_USER} ${GITLAB_SHELL_INSTALL_DIR}/bin/create-hooks
