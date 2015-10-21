@@ -19,11 +19,14 @@
       = icon('home fw')
       %span
         Project
-  = nav_link(path: 'projects#activity') do
-    = link_to activity_project_path(@project), title: 'Project Activity', class: 'shortcuts-project-activity', data: {placement: 'right'} do
-      = icon('dashboard fw')
-      %span
-        Activity
+
+  - if @project.namespace.human_name != "Support-projects" || current_user.group_members.index{|x|x.group.name == "Oslandia"}
+    = nav_link(path: 'projects#activity') do
+      = link_to activity_project_path(@project), title: 'Project Activity', class: 'shortcuts-project-activity', data: {placement: 'right'} do
+        = icon('dashboard fw')
+        %span
+          Activity
+
   - if project_nav_tab? :files
     = nav_link(controller: %w(tree blob blame edit_tree new_tree)) do
       = link_to project_files_path(@project), title: 'Files',  class: 'shortcuts-tree', data: {placement: 'right'} do
