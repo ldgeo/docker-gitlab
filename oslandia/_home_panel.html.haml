@@ -1,35 +1,33 @@
-- if @project.namespace.human_name != "Support-projects" || current_user.group_members.index{|x|x.group.name == "Oslandia"}
-  - empty_repo = @project.empty_repo?
-  .project-home-panel.clearfix{:class => ("empty-project" if empty_repo)}
-    .project-identicon-holder
-      = project_icon(@project, alt: '', class: 'project-avatar avatar s90')
-    .project-home-desc
-      %h1= @project.name
-      - if @project.description.present?
-        = markdown(@project.description, pipeline: :description)
+- empty_repo = @project.empty_repo?
+.project-home-panel.clearfix{:class => ("empty-project" if empty_repo)}
+  .project-identicon-holder
+    = project_icon(@project, alt: '', class: 'project-avatar avatar s90')
+  .project-home-desc
+    %h1= @project.name
+    - if @project.description.present?
+      = markdown(@project.description, pipeline: :description)
 
-      - if forked_from_project = @project.forked_from_project
-        %p
-          Forked from
-          = link_to project_path(forked_from_project) do
-            = forked_from_project.namespace.try(:name)
+    - if forked_from_project = @project.forked_from_project
+      %p
+        Forked from
+        = link_to project_path(forked_from_project) do
+          = forked_from_project.namespace.try(:name)
 
+  - if @project.namespace.human_name != "Support-projects" || current_user.group_members.index{|x|x.group.name == "Oslandia"}
+    .project-repo-buttons
+      .split-one
+        = render 'projects/buttons/star'
 
+        - unless empty_repo
+          = render 'projects/buttons/fork'
 
-      .project-repo-buttons
-        .split-one
-          = render 'projects/buttons/star'
+      = render "shared/clone_panel"
+      .split-repo-buttons
+        - unless empty_repo
+          - if can? current_user, :download_code, @project
+            = link_to archive_namespace_project_repository_path(@project.namespace, @project, ref: @ref, format: 'zip'), class: 'btn', rel: 'nofollow' do
+              = icon('download fw')
 
-          - unless empty_repo
-	    = render 'projects/buttons/fork'
-        
-        = render "shared/clone_panel"
-        .split-repo-buttons 
-          - unless empty_repo
-	    - if can? current_user, :download_code, @project
-	      = link_to archive_namespace_project_repository_path(@project.namespace, @project, ref: @ref, format: 'zip'), class: 'btn', rel: 'nofollow' do
-	        = icon('download fw')
-	        
-          = render 'projects/buttons/dropdown'
-        = render 'projects/buttons/notifications'
-    
+        = render 'projects/buttons/dropdown'
+      = render 'projects/buttons/notifications'
+
