@@ -363,8 +363,6 @@ sudo -HEu ${GITLAB_USER} cp ${SYSCONF_TEMPLATES_DIR}/gitlabhq/unicorn.rb        
 sudo -HEu ${GITLAB_USER} cp ${SYSCONF_TEMPLATES_DIR}/gitlabhq/rack_attack.rb    config/initializers/rack_attack.rb
 [[ ${SMTP_ENABLED} == true ]] && \
 sudo -HEu ${GITLAB_USER} cp ${SYSCONF_TEMPLATES_DIR}/gitlabhq/smtp_settings.rb  config/initializers/smtp_settings.rb
-[[ ${IMAP_ENABLED} == true ]] && \
-sudo -HEu ${GITLAB_USER} cp ${SYSCONF_TEMPLATES_DIR}/gitlabhq/mail_room.yml     config/mail_room.yml
 
 # override default configuration templates with user templates
 case ${GITLAB_HTTPS} in
@@ -389,7 +387,6 @@ esac
 [[ ${SMTP_ENABLED} == true ]] && \
 [[ -f ${USERCONF_TEMPLATES_DIR}/gitlabhq/smtp_settings.rb ]] && sudo -HEu ${GITLAB_USER} cp ${USERCONF_TEMPLATES_DIR}/gitlabhq/smtp_settings.rb config/initializers/smtp_settings.rb
 [[ ${IMAP_ENABLED} == true ]] && \
-[[ -f ${USERCONF_TEMPLATES_DIR}/gitlabhq/mail_room.yml ]]    && sudo -HEu ${GITLAB_USER} cp ${USERCONF_TEMPLATES_DIR}/gitlabhq/mail_room.yml    config/mail_room.yml
 
 # override robots.txt if a user configuration exists
 [[ -f ${GITLAB_ROBOTS_PATH} ]]                               && sudo -HEu ${GITLAB_USER} cp ${GITLAB_ROBOTS_PATH}                               public/robots.txt
@@ -569,24 +566,28 @@ sed 's/{{GITLAB_INCOMING_EMAIL_ENABLED}}/'"${GITLAB_INCOMING_EMAIL_ENABLED}"'/' 
 sudo -HEu ${GITLAB_USER} sed 's/{{GITLAB_INCOMING_EMAIL_ENABLED}}/'"${GITLAB_INCOMING_EMAIL_ENABLED}"'/' -i config/gitlab.yml
 sudo -HEu ${GITLAB_USER} sed 's/{{GITLAB_INCOMING_EMAIL_ADDRESS}}/'"${GITLAB_INCOMING_EMAIL_ADDRESS}"'/' -i config/gitlab.yml
 if [[ ${IMAP_ENABLED} == true ]]; then
-  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_HOST}}/'"${IMAP_HOST}"'/' -i config/mail_room.yml
-  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_PORT}}/'"${IMAP_PORT}"'/' -i config/mail_room.yml
-
   case ${IMAP_USER} in
-    "") sudo -HEu ${GITLAB_USER} sed '/{{IMAP_USER}}/d' -i config/mail_room.yml ;;
-    *) sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_USER}}/'"${IMAP_USER}"'/' -i config/mail_room.yml ;;
+    "") sudo -HEu ${GITLAB_USER} sed '/{{IMAP_USER}}/d' -i config/gitlab.yml ;;
+    *) sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_USER}}/'"${IMAP_USER}"'/' -i config/gitlab.yml ;;
   esac
 
   case ${IMAP_PASS} in
-    "") sudo -HEu ${GITLAB_USER} sed '/{{IMAP_PASS}}/d' -i config/mail_room.yml ;;
-    *) sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_PASS}}/'"${IMAP_PASS}"'/' -i config/mail_room.yml ;;
+    "") sudo -HEu ${GITLAB_USER} sed '/{{IMAP_PASS}}/d' -i config/gitlab.yml ;;
+    *) sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_PASS}}/'"${IMAP_PASS}"'/' -i config/gitlab.yml ;;
   esac
-
-  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_SSL}}/'"${IMAP_SSL}"'/' -i config/mail_room.yml
-  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_STARTTLS}}/'"${IMAP_STARTTLS}"'/' -i config/mail_room.yml
-  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_MAILBOX}}/'"${IMAP_MAILBOX}"'/' -i config/mail_room.yml
-  sudo -HEu ${GITLAB_USER} sed 's/{{REDIS_HOST}}/'"${REDIS_HOST}"'/' -i config/mail_room.yml
-  sudo -HEu ${GITLAB_USER} sed 's/{{REDIS_PORT}}/'"${REDIS_PORT}"'/' -i config/mail_room.yml
+  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_HOST}}/'"${IMAP_HOST}"'/' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_PORT}}/'"${IMAP_PORT}"'/' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_SSL}}/'"${IMAP_SSL}"'/' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_STARTTLS}}/'"${IMAP_STARTTLS}"'/' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed 's/{{IMAP_MAILBOX}}/'"${IMAP_MAILBOX}"'/' -i config/gitlab.yml
+else
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_USER}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_PASS}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_HOST}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_PORT}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_SSL}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_STARTTLS}}/d' -i config/gitlab.yml
+  sudo -HEu ${GITLAB_USER} sed '/{{IMAP_MAILBOX}}/d' -i config/gitlab.yml
 fi
 
 # apply LDAP configuration
@@ -788,6 +789,14 @@ fi
 # configure relative_url_root
 sed 's,{{GITLAB_RELATIVE_URL_ROOT}},'"${GITLAB_RELATIVE_URL_ROOT}"',' -i /etc/supervisor/conf.d/gitlab-git-http-server.conf
 if [[ -n ${GITLAB_RELATIVE_URL_ROOT} ]]; then
+  # create symlink to assets in tmp/cache
+  rm -rf tmp/cache
+  sudo -HEu ${GITLAB_USER} ln -s ${GITLAB_DATA_DIR}/tmp/cache tmp/cache
+
+  # create symlink to assets in public/assets
+  rm -rf public/assets
+  sudo -HEu ${GITLAB_USER} ln -s ${GITLAB_DATA_DIR}/tmp/public/assets public/assets
+
   sed 's,{{GITLAB_RELATIVE_URL_ROOT__with_trailing_slash}},'"${GITLAB_RELATIVE_URL_ROOT}/"',' -i /etc/nginx/sites-enabled/gitlab
   sed 's,# alias'"${GITLAB_INSTALL_DIR}"'/public,alias '"${GITLAB_INSTALL_DIR}"'/public,' -i /etc/nginx/sites-enabled/gitlab
 
@@ -922,8 +931,18 @@ appInit () {
     rm -rf ${GITLAB_DATA_DIR}/tmp
     sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/
 
-    # clear the cache
-    sudo -HEu ${GITLAB_USER} bundle exec rake cache:clear >/dev/null 2>&1
+    # assets need to be recompiled when GITLAB_RELATIVE_URL_ROOT is used
+    if [[ -n ${GITLAB_RELATIVE_URL_ROOT} ]]; then
+      # create the tmp/cache and tmp/public/assets directory
+      sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/cache/
+      sudo -HEu ${GITLAB_USER} mkdir -p ${GITLAB_DATA_DIR}/tmp/public/assets/
+
+      echo "GITLAB_RELATIVE_URL_ROOT in use, recompiling assets, this could take a while..."
+      sudo -HEu ${GITLAB_USER} bundle exec rake assets:clean assets:precompile cache:clear >/dev/null 2>&1
+    else
+      # clear the cache
+      sudo -HEu ${GITLAB_USER} bundle exec rake cache:clear >/dev/null 2>&1
+    fi
 
     # update VERSION information
     sudo -HEu ${GITLAB_USER} echo "${GITLAB_VERSION}" > ${GITLAB_DATA_DIR}/tmp/VERSION
@@ -941,7 +960,6 @@ appInit () {
   case ${GITLAB_BACKUPS} in
     daily|weekly|monthly)
       read hour min <<< ${GITLAB_BACKUP_TIME//[:]/ }
-      crontab -u ${GITLAB_USER} -l > /tmp/cron.${GITLAB_USER}
       case ${GITLAB_BACKUPS} in
         daily)
           sudo -HEu ${GITLAB_USER} cat >> /tmp/cron.${GITLAB_USER} <<EOF
