@@ -1,3 +1,5 @@
+- @no_container = true
+
 = content_for :meta_tags do
   - if current_user
     = auto_discovery_link_tag(:atom, namespace_project_path(@project.namespace, @project, format: :atom, private_token: current_user.private_token), title: "#{@project.name} activity")
@@ -7,14 +9,12 @@
     = render 'shared/no_ssh'
     = render 'shared/no_password'
 
-- if prefer_readme?
-  = render 'projects/last_push'
-
+= render 'projects/last_push'
 = render "home_panel"
 
 - if @project.namespace.human_name != "Support-projects" || current_user.group_members.index{|x|x.group.name == "Oslandia"}
-  .project-stats.gray-content-block
-    %ul.nav.nav-pills
+  .project-stats.gray-content-block.second-block
+    %ul.nav
       %li
         = link_to namespace_project_commits_path(@project.namespace, @project, current_ref) do
           = pluralize(number_with_delimiter(@project.commit_count), 'commit')
@@ -29,7 +29,7 @@
         = link_to project_files_path(@project) do
           = repository_size
 
-      - if !prefer_readme? && @repository.readme
+      - if default_project_view != 'readme' && @repository.readme
         %li
           = link_to 'Readme', readme_path(@project)
 
@@ -59,28 +59,17 @@
             = link_to add_contribution_guide_path(@project) do
               Add Contribution guide
 
-- if @project.archived?
-  .text-warning.center.prepend-top-20
-    %p
-      = icon("exclamation-triangle fw")
-      Archived project! Repository is read-only
+  - if @repository.commit
+    .content-block.second-block.white
+      %div{ class: container_class }
+        = render 'projects/last_commit', commit: @repository.commit, project: @project
 
-%section
-  - if prefer_readme?
-    .project-show-readme
-      = render 'projects/readme'
-  - else
-    .project-show-activity
-      = render 'projects/activity'
+%div{ class: container_class }
+  - if @project.archived?
+    .text-warning.center.prepend-top-20
+      %p
+        = icon("exclamation-triangle fw")
+        Archived project! Repository is read-only
 
-
-- if current_user
-  - access = user_max_access_in_project(current_user, @project)
-  - if access
-    .prepend-top-20.project-footer
-      .gray-content-block.footer-block.center
-        You have #{access} access to this project.
-        - if @project.project_member_by_id(current_user)
-          = link_to leave_namespace_project_project_members_path(@project.namespace, @project),
-            data: { confirm: leave_project_message(@project) }, method: :delete, title: 'Leave project', class: 'cred' do
-            Leave this project
+  %div{class: "project-show-#{default_project_view}"}
+    = render default_project_view
