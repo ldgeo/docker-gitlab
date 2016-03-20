@@ -1,19 +1,22 @@
-FROM quay.io/sameersbn/ubuntu:14.04.20151023
+FROM sameersbn/ubuntu:14.04.20160317
 MAINTAINER sameer@damagehead.com
 
-ENV GITLAB_VERSION=8.1.0 \
-    GITLAB_SHELL_VERSION=2.6.5 \
-    GITLAB_GIT_HTTP_SERVER_VERSION=0.3.0 \
+ENV GITLAB_VERSION=8.5.8 \
+    GITLAB_SHELL_VERSION=2.6.10 \
+    GITLAB_WORKHORSE_VERSION=0.6.4 \
+    GOLANG_VERSION=1.5.3 \
     GITLAB_USER="git" \
     GITLAB_HOME="/home/git" \
     GITLAB_LOG_DIR="/var/log/gitlab" \
-    SETUP_DIR="/var/cache/gitlab" \
+    GITLAB_CACHE_DIR="/etc/docker-gitlab" \
     RAILS_ENV=production
 
 ENV GITLAB_INSTALL_DIR="${GITLAB_HOME}/gitlab" \
     GITLAB_SHELL_INSTALL_DIR="${GITLAB_HOME}/gitlab-shell" \
-    GITLAB_GIT_HTTP_SERVER_INSTALL_DIR="${GITLAB_HOME}/gitlab-git-http-server" \
-    GITLAB_DATA_DIR="${GITLAB_HOME}/data"
+    GITLAB_WORKHORSE_INSTALL_DIR="${GITLAB_HOME}/gitlab-workhorse" \
+    GITLAB_DATA_DIR="${GITLAB_HOME}/data" \
+    GITLAB_BUILD_DIR="${GITLAB_CACHE_DIR}/build" \
+    GITLAB_RUNTIME_DIR="${GITLAB_CACHE_DIR}/runtime"
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E1DD270288B4E6030699E45FA1715D88E1DF1F24 \
  && echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main" >> /etc/apt/sources.list \
@@ -26,20 +29,20 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E1DD270288B4E60
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y supervisor logrotate locales curl \
       nginx openssh-server mysql-client postgresql-client redis-tools \
-      git-core ruby2.1 python2.7 python-docutils nodejs \
+      git-core ruby2.1 python2.7 python-docutils nodejs gettext-base \
       libmysqlclient18 libpq5 zlib1g libyaml-0-2 libssl1.0.0 \
       libgdbm3 libreadline6 libncurses5 libffi6 \
       libxml2 libxslt1.1 libcurl3 libicu52 \
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
- && dpkg-reconfigure locales \
+ && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && gem install --no-document bundler \
  && rm -rf /var/lib/apt/lists/*
 
-COPY assets/setup/ ${SETUP_DIR}/
-RUN bash ${SETUP_DIR}/install.sh
+COPY assets/build/ ${GITLAB_BUILD_DIR}/
+RUN bash ${GITLAB_BUILD_DIR}/install.sh
 
-COPY assets/config/ ${SETUP_DIR}/config/
+COPY assets/runtime/ ${GITLAB_RUNTIME_DIR}/
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 

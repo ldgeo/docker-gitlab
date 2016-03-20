@@ -1,5 +1,6 @@
 postgresql:
-  image: quay.io/sameersbn/postgresql:9.4-5
+  restart: always
+  image: sameersbn/postgresql:9.4-15
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -7,7 +8,8 @@ postgresql:
   volumes:
     - /srv/docker/gitlab/postgresql:/var/lib/postgresql
 gitlab:
-  image: quay.io/sameersbn/gitlab:8.1.0-2
+  restart: always
+  image: sameersbn/gitlab:8.5.8
   links:
     - redis:redisio
     - postgresql:postgresql
@@ -15,6 +17,7 @@ gitlab:
     - "10080:80"
     - "10022:22"
   environment:
+    - DEBUG=false
     - TZ=Asia/Kolkata
     - GITLAB_TIMEZONE=Kolkata
 
@@ -32,7 +35,7 @@ gitlab:
     - GITLAB_EMAIL_REPLY_TO=noreply@example.com
     - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
 
-    - GITLAB_BACKUPS=daily
+    - GITLAB_BACKUP_SCHEDULE=daily
     - GITLAB_BACKUP_TIME=01:00
 
     - SMTP_ENABLED=false
@@ -54,6 +57,7 @@ gitlab:
   volumes:
     - /srv/docker/gitlab/gitlab:/home/git/data
 redis:
-  image: quay.io/sameersbn/redis:latest
+  restart: always
+  image: sameersbn/redis:latest
   volumes:
     - /srv/docker/gitlab/redis:/var/lib/redis
