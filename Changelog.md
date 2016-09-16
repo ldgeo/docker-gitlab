@@ -2,6 +2,102 @@
 
 This file only reflects the changes that are made in this image. Please refer to the upstream GitLab [CHANGELOG](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/CHANGELOG) for the list of changes in GitLab.
 
+**8.11.5**
+- gitlab: upgrade to CE v8.11.5
+
+**8.11.4**
+- gitlab: upgrade to CE v8.11.4
+
+**8.11.3**
+- gitlab: upgrade to CE v8.11.3
+
+**8.11.2**
+- gitlab: upgrade to CE v8.11.2
+
+**8.11.0**
+- gitlab: upgrade to CE v8.11.0
+- added `GITLAB_SECRETS_SECRET_KEY_BASE`
+- added `GITLAB_SECRETS_OTP_KEY_BASE`
+
+**Important**
+When you start to upgrade from `8.10-7` or below use the key of `/home/git/data/.secret` for  `GITLAB_SECRETS_OTP_KEY_BASE` otherwise it will break your 2FA .
+
+**8.10.7**
+- gitlab: upgrade to CE v8.10.7
+
+**8.10.6**
+- gitlab: upgrade to CE v8.10.6
+
+**8.10.5**
+- gitlab: upgrade to CE v8.10.5
+
+**8.10.4**
+- gitlab: upgrade to CE v8.10.4
+
+**8.10.3**
+- gitlab: upgrade to CE v8.10.3
+
+**8.10.2-1**
+- Fix `OAUTH_GOOGLE_RESTRICT_DOMAIN`
+
+**8.10.2**
+- gitlab: upgrade to CE v8.10.2
+- Improve `OAUTH_GOOGLE_RESTRICT_DOMAIN` for multiple restricted domains
+
+**8.10.1**
+- gitlab: upgrade to CE v8.10.1
+
+**8.10.0**
+- gitlab: upgrade to CE v8.10.0
+
+**8.9.6**
+- gitlab: upgrade to CE v8.9.6
+
+**8.9.5**
+- gitlab: upgrade to CE v8.9.5
+
+**8.9.4**
+- gitlab: upgrade to CE v8.9.4
+
+**8.9.3**
+- gitlab: upgrade to CE v8.9.3
+
+**8.9.2**
+- gitlab: upgrade to CE v8.9.2
+
+**8.9.1**
+- gitlab: upgrade to CE v8.9.1
+
+**8.9.0**
+- gitlab: upgrade to CE v8.9.0
+
+**8.8.5-1**
+- added GitLab Container Registry support
+- added `SSL_CIPHERS` option to change ciphers of the nginx
+
+**8.8.5**
+- gitlab: upgrade to CE v8.8.5
+
+**8.8.4**
+- gitlab: upgrade to CE v8.8.4
+- added `GITLAB_PROJECTS_LIMIT` configuration option
+
+**8.8.3**
+- gitlab: upgrade to CE v8.8.3
+
+**8.8.2**
+- gitlab: upgrade to CE v8.8.2
+
+**8.8.1**
+- gitlab: upgrade to CE v8.8.1
+
+**8.8.0**
+- gitlab: upgrade to CE v8.8.0
+- oauth: exposed `OAUTH_GITHUB_URL` and `OAUTH_GITHUB_VERIFY_SSL` options for users for GitHub Enterprise.
+
+**8.7.6**
+- gitlab: upgrade to CE v8.7.6
+
 **8.7.5**
 - gitlab: upgrade to CE v8.7.5
 

@@ -17,6 +17,7 @@ GITLAB_ROBOTS_CONFIG="${GITLAB_INSTALL_DIR}/public/robots.txt"
 GITLAB_SHELL_CONFIG="${GITLAB_SHELL_INSTALL_DIR}/config.yml"
 GITLAB_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab"
 GITLAB_CI_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab_ci"
+GITLAB_REGISTRY_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab-registry"
 
 # Compares two version strings `a` and `b`
 # Returns
@@ -442,11 +443,20 @@ gitlab_configure_oauth_google() {
   if [[ -n ${OAUTH_GOOGLE_API_KEY} && -n ${OAUTH_GOOGLE_APP_SECRET} ]]; then
     echo "Configuring gitlab::oauth::google..."
     OAUTH_ENABLED=${OAUTH_ENABLED:-true}
-    update_template ${GITLAB_CONFIG} \
-      OAUTH_GOOGLE_API_KEY \
-      OAUTH_GOOGLE_APP_SECRET \
-      OAUTH_GOOGLE_RESTRICT_DOMAIN \
-      OAUTH_GOOGLE_APPROVAL_PROMPT
+    if [[ -n ${OAUTH_GOOGLE_RESTRICT_DOMAIN} ]]; then
+      update_template ${GITLAB_CONFIG} \
+        OAUTH_GOOGLE_API_KEY \
+        OAUTH_GOOGLE_APP_SECRET \
+        OAUTH_GOOGLE_RESTRICT_DOMAIN \
+        OAUTH_GOOGLE_APPROVAL_PROMPT
+    else
+      exec_as_git sed -i "/ hd\: \[{{OAUTH_GOOGLE_RESTRICT_DOMAIN}}\]/d" ${GITLAB_CONFIG}
+      exec_as_git sed -i "s/approval_prompt: '{{OAUTH_GOOGLE_APPROVAL_PROMPT}}',/approval_prompt: '{{OAUTH_GOOGLE_APPROVAL_PROMPT}}' } }/" ${GITLAB_CONFIG}
+      update_template ${GITLAB_CONFIG} \
+        OAUTH_GOOGLE_API_KEY \
+        OAUTH_GOOGLE_APP_SECRET \
+        OAUTH_GOOGLE_APPROVAL_PROMPT
+    fi
   else
     exec_as_git sed -i "/name: 'google_oauth2'/,/{{OAUTH_GOOGLE_RESTRICT_DOMAIN}}/d" ${GITLAB_CONFIG}
   fi
@@ -483,6 +493,8 @@ gitlab_configure_oauth_github() {
     update_template ${GITLAB_CONFIG} \
       OAUTH_GITHUB_API_KEY \
       OAUTH_GITHUB_APP_SECRET \
+      OAUTH_GITHUB_URL \
+      OAUTH_GITHUB_VERIFY_SSL \
       OAUTH_GITHUB_SCOPE
   else
     exec_as_git sed -i "/name: 'github'/,/{{OAUTH_GITHUB_SCOPE}}/d" ${GITLAB_CONFIG}
@@ -644,7 +656,24 @@ gitlab_configure_secrets() {
     return 1
   fi
 
-  update_template ${GITLAB_SECRETS_CONFIG} GITLAB_SECRETS_DB_KEY_BASE
+  if [[ -z $GITLAB_SECRETS_SECRET_KEY_BASE ]]; then
+    echo "ERROR: "
+    echo "  Please configure the GITLAB_SECRETS_SECRET_KEY_BASE parameter."
+    echo "  Cannot continue. Aborting..."
+    return 1
+  fi
+
+  if [[ -z $GITLAB_SECRETS_OTP_KEY_BASE ]]; then
+    echo "ERROR: "
+    echo "  Please configure the GITLAB_SECRETS_OTP_KEY_BASE parameter."
+    echo "  Cannot continue. Aborting..."
+    return 1
+  fi
+
+  update_template ${GITLAB_SECRETS_CONFIG} \
+  GITLAB_SECRETS_DB_KEY_BASE \
+  GITLAB_SECRETS_SECRET_KEY_BASE \
+  GITLAB_SECRETS_OTP_KEY_BASE
 }
 
 gitlab_configure_sidekiq() {
@@ -702,7 +731,8 @@ gitlab_configure_backups_aws() {
         AWS_BACKUP_REGION \
         AWS_BACKUP_ACCESS_KEY_ID \
         AWS_BACKUP_SECRET_ACCESS_KEY \
-        AWS_BACKUP_BUCKET
+        AWS_BACKUP_BUCKET \
+        AWS_BACKUP_MULTIPART_CHUNK_SIZE
       ;;
     *)
       exec_as_git sed -i "/upload:/,/remote_directory:/d" ${GITLAB_CONFIG}
@@ -807,7 +837,30 @@ gitlab_configure_project_features() {
     GITLAB_PROJECTS_WIKI \
     GITLAB_PROJECTS_SNIPPETS \
     GITLAB_PROJECTS_BUILDS \
+    GITLAB_PROJECTS_CONTAINER_REGISTRY \
     GITLAB_WEBHOOK_TIMEOUT
+}
+
+gitlab_configure_registry(){
+  echo "Configuring gitlab::registry..."
+
+  if [[ ${GITLAB_REGISTRY_PORT} == 443 ]]; then
+    # Sets GITLAB_REGISTRY_PORT empty for the scope of this function.
+    # This helps us to add an empty key to `.gitlab-ci.yml`.
+    # Because 443 is the default https port it doesn't need to be included in docker push/pull commands
+    # and shouldn't be displayed on the gitlab ui.
+    # Example: `docker pull registry:443/some/image` is the same as `docker pull registry/some/image`
+    local GITLAB_REGISTRY_PORT=""
+  fi
+
+  update_template ${GITLAB_CONFIG} \
+    GITLAB_REGISTRY_ENABLED \
+    GITLAB_REGISTRY_DIR \
+    GITLAB_REGISTRY_HOST \
+    GITLAB_REGISTRY_PORT \
+    GITLAB_REGISTRY_API_URL \
+    GITLAB_REGISTRY_KEY_PATH \
+    GITLAB_REGISTRY_ISSUER
 }
 
 nginx_configure_gitlab_ssl() {
@@ -822,7 +875,8 @@ nginx_configure_gitlab_ssl() {
       SSL_KEY_PATH \
       SSL_DHPARAM_PATH \
       SSL_VERIFY_CLIENT \
-      SSL_CA_CERTIFICATES_PATH
+      SSL_CA_CERTIFICATES_PATH \
+      SSL_CIPHERS
   fi
 }
 
@@ -875,6 +929,20 @@ nginx_configure_gitlab_ci() {
       DNS_RESOLVERS
   fi
 }
+
+nginx_configure_gitlab_registry() {
+  if [[ $GITLAB_REGISTRY_ENABLED == true && -f ${SSL_REGISTRY_CERT_PATH} && -f ${SSL_REGISTRY_KEY_PATH} ]]; then
+    echo "Configuring nginx::gitlab-registry..."
+    update_template ${GITLAB_REGISTRY_NGINX_CONFIG} \
+      GITLAB_LOG_DIR \
+      GITLAB_REGISTRY_PORT \
+      GITLAB_REGISTRY_HOST \
+      GITLAB_REGISTRY_API_URL \
+      SSL_REGISTRY_KEY_PATH \
+      SSL_REGISTRY_CERT_PATH
+  fi
+}
+
 
 #   _|_|_|              _|        _|  _|
 #   _|    _|  _|    _|  _|_|_|    _|        _|_|_|
@@ -958,6 +1026,7 @@ initialize_datadir() {
   chmod u+rwX ${GITLAB_SHARED_DIR}
   chown ${GITLAB_USER}: ${GITLAB_SHARED_DIR}
 
+  # create attifacts dir
   mkdir -p ${GITLAB_ARTIFACTS_DIR}
   chmod u+rwX ${GITLAB_ARTIFACTS_DIR}
   chown ${GITLAB_USER}: ${GITLAB_ARTIFACTS_DIR}
@@ -970,6 +1039,13 @@ initialize_datadir() {
   mkdir -p ${GITLAB_LFS_OBJECTS_DIR}
   chmod u+rwX ${GITLAB_LFS_OBJECTS_DIR}
   chown ${GITLAB_USER}: ${GITLAB_LFS_OBJECTS_DIR}
+
+  # create registry dir
+  if [[ ${GITLAB_REGISTRY_ENABLED} == true ]]; then
+    mkdir -p ${GITLAB_REGISTRY_DIR}
+    chmod u+rwX ${GITLAB_REGISTRY_DIR}
+    chown ${GITLAB_USER}: ${GITLAB_REGISTRY_DIR}
+  fi
 
   # create the backups directory
   mkdir -p ${GITLAB_BACKUP_DIR}
@@ -1031,6 +1107,11 @@ sanitize_datadir() {
 
   chmod -R u+rwX ${GITLAB_LFS_OBJECTS_DIR}
   chown -R ${GITLAB_USER}: ${GITLAB_LFS_OBJECTS_DIR}
+
+  if [[ ${GITLAB_REGISTRY_ENABLED} == true ]]; then
+    chmod -R u+rwX ${GITLAB_REGISTRY_DIR}
+    chown -R ${GITLAB_USER}: ${GITLAB_REGISTRY_DIR}
+  fi
 
   find ${GITLAB_DATA_DIR}/uploads -type f -exec chmod 0644 {} \;
   find ${GITLAB_DATA_DIR}/uploads -type d -not -path ${GITLAB_DATA_DIR}/uploads -exec chmod 0755 {} \;
@@ -1101,7 +1182,7 @@ install_configuration_templates() {
     if [[ -f ${SSL_CERTIFICATE_PATH} && -f ${SSL_KEY_PATH} && -f ${SSL_DHPARAM_PATH} ]]; then
       install_template root: nginx/gitlab-ssl ${GITLAB_NGINX_CONFIG}
     else
-      echo "SSL keys and certificates were not found."
+      echo "SSL Key, SSL Certificate and DHParam were not found."
       echo "Assuming that the container is running behind a HTTPS enabled load balancer."
       install_template root: nginx/gitlab ${GITLAB_NGINX_CONFIG}
     fi
@@ -1111,6 +1192,15 @@ install_configuration_templates() {
 
   if [[ -n $GITLAB_CI_HOST ]]; then
     install_template root: nginx/gitlab_ci ${GITLAB_CI_NGINX_CONFIG}
+  fi
+
+  if [[ ${GITLAB_REGISTRY_ENABLED} == true ]]; then
+    if [[ -f ${SSL_REGISTRY_CERT_PATH} && -f ${SSL_REGISTRY_KEY_PATH} ]]; then
+      install_template root: nginx/gitlab-registry ${GITLAB_REGISTRY_NGINX_CONFIG}
+    else
+      echo "SSL key and certificates for Registry were not found"
+      echo "Assuming that the Registry is running behind a HTTPS enabled load balancer."
+    fi
   fi
 }
 
@@ -1131,6 +1221,7 @@ configure_gitlab() {
     GITLAB_SSH_HOST \
     GITLAB_SSH_PORT \
     GITLAB_SIGNUP_ENABLED \
+    GITLAB_PROJECTS_LIMIT \
     GITLAB_USERNAME_CHANGE \
     GITLAB_CREATE_GROUP \
     GITLAB_TIMEOUT
@@ -1156,6 +1247,7 @@ configure_gitlab() {
   gitlab_configure_gravatar
   gitlab_configure_analytics
   gitlab_configure_backups
+  gitlab_configure_registry
 
   # remove stale gitlab.socket
   rm -rf ${GITLAB_INSTALL_DIR}/tmp/sockets/gitlab.socket
@@ -1167,9 +1259,6 @@ configure_gitlab_shell() {
     GITLAB_RELATIVE_URL_ROOT \
     GITLAB_HOME \
     GITLAB_LOG_DIR \
-    GITLAB_DATA_DIR \
-    GITLAB_BACKUP_DIR \
-    GITLAB_REPOS_DIR \
     GITLAB_SHELL_INSTALL_DIR \
     SSL_SELF_SIGNED \
     REDIS_HOST \
@@ -1179,9 +1268,14 @@ configure_gitlab_shell() {
 
 configure_nginx() {
   echo "Configuring nginx..."
-  sed -i "s|worker_processes .*|worker_processes ${NGINX_WORKERS};|" /etc/nginx/nginx.conf
+  sed -i \
+  -e "s|worker_processes .*|worker_processes ${NGINX_WORKERS};|" \
+  -e "s|# server_names_hash_bucket_size 64;|server_names_hash_bucket_size ${NGINX_SERVER_NAMES_HASH_BUCKET_SIZE};|" \
+  /etc/nginx/nginx.conf
+
   nginx_configure_gitlab
   nginx_configure_gitlab_ci
+  nginx_configure_gitlab_registry
 }
 
 migrate_database() {
@@ -1196,12 +1290,6 @@ migrate_database() {
       COUNT=$(PGPASSWORD="${DB_PASS}" psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -Atw -c "${QUERY}")
       ;;
   esac
-  if [[ -z ${COUNT} || ${COUNT} -eq 0 ]]; then
-    echo "Setting up GitLab for firstrun. Please be patient, this could take a while..."
-    exec_as_git force=yes bundle exec rake gitlab:setup \
-      ${GITLAB_ROOT_PASSWORD:+GITLAB_ROOT_PASSWORD=$GITLAB_ROOT_PASSWORD} \
-      ${GITLAB_ROOT_EMAIL:+GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL} >/dev/null
-  fi
 
   # migrate database if the gitlab version has changed.
   CACHE_VERSION=
@@ -1240,6 +1328,13 @@ migrate_database() {
 
     echo "${GITLAB_VERSION}" > ${GITLAB_TEMP_DIR}/VERSION
     rm -rf ${GITLAB_TEMP_DIR}/GITLAB_RELATIVE_URL_ROOT # force cache cleanup
+  fi
+
+  if [[ -z ${COUNT} || ${COUNT} -eq 0 ]]; then
+    echo "Setting up GitLab for firstrun. Please be patient, this could take a while..."
+    exec_as_git force=yes bundle exec rake gitlab:setup \
+      ${GITLAB_ROOT_PASSWORD:+GITLAB_ROOT_PASSWORD=$GITLAB_ROOT_PASSWORD} \
+      ${GITLAB_ROOT_EMAIL:+GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL} >/dev/null
   fi
 
   # clear cache if relative_url has changed.
