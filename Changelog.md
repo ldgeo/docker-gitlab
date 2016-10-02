@@ -2,6 +2,25 @@
 
 This file only reflects the changes that are made in this image. Please refer to the upstream GitLab [CHANGELOG](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/CHANGELOG) for the list of changes in GitLab.
 
+8.12.3
+- gitlab: upgrade to CE v8.12.3
+
+Important:
+We skipped `8.12.2` because it doesn't contain any changes. For more
+information [8.12.3 release](https://about.gitlab.com/2016/09/29/gitlab-8-12-3-released/)
+
+8.12.1
+- gitlab: upgrade to CE v8.12.1
+
+8.12.0
+- gitlab: upgrade to CE v8.12.0
+
+8.11.7
+- gitlab: upgrade to CE v8.11.7
+
+8.11.6
+- gitlab: upgrade to CE v8.11.6
+
 **8.11.5**
 - gitlab: upgrade to CE v8.11.5
 
@@ -37,7 +56,7 @@ When you start to upgrade from `8.10-7` or below use the key of `/home/git/data/
 **8.10.3**
 - gitlab: upgrade to CE v8.10.3
 
-**8.10.2-1**
+8.10.2-1**
 - Fix `OAUTH_GOOGLE_RESTRICT_DOMAIN`
 
 **8.10.2**
