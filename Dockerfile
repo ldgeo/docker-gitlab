@@ -52,12 +52,10 @@ COPY oslandia /app/
 
 RUN cp -rf /app/new_user_email.html.haml /home/git/gitlab/app/views/notify/ && \
 cp -rf /app/new_email_email.text.erb /home/git/gitlab/app/views/notify/ && \
-cp -rf /app/new_email_email.text.erb /home/git/gitlab/app/views/notify/ && \
 cp -rf /app/new_email_email.html.haml /home/git/gitlab/app/views/notify/ && \
 cp -rf /app/notify.html.haml /home/git/gitlab/app/views/layouts/ && \
-cp -rf /app/_home_panel.html.haml /home/git/gitlab/app/views/projects/ && \
-cp -rf /app/reset_password_instructions.html.erb /home/git/gitlab/app/views/devise/mailer/ && \
-cp -rf /app/confirmation_instructions.html.erb /home/git/gitlab/app/views/devise/mailer/ && \
+cp -rf /app/reset_password_instructions.text.erb /home/git/gitlab/app/views/devise/mailer/ && \
+cp -rf /app/confirmation_instructions.text.erb /home/git/gitlab/app/views/devise/mailer/ && \
 chown -R git:git /home/git/gitlab/app/assets/images/ && \
 chown -R git:git /home/git/gitlab/app/helpers/ && \
 chown -R git:git /home/git/gitlab/app/views/notify/ && \
