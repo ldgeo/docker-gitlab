@@ -1,24 +1,58 @@
 # Changelog
 
-This file only reflects the changes that are made in this image. Please refer to the upstream GitLab [CHANGELOG](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/CHANGELOG) for the list of changes in GitLab.
+This file only reflects the changes that are made in this image. Please refer to the upstream GitLab [CHANGELOG](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/CHANGELOG.md) for the list of changes in GitLab.
 
-8.12.3
+**8.13.5**
+- gitlab: upgrade to CE v8.13.5
+
+**Important**:
+We skipped `8.13.4` because it doesn't contain any changes. For more
+information [8.13.4 release](https://about.gitlab.com/2016/11/09/gitlab-8-dot-13-dot-5-released/)
+
+**8.12.1**
+
+**8.13.3**
+- gitlab: upgrade to CE v8.13.3
+
+**8.13.2**
+- gitlab: upgrade to CE v8.13.2
+
+**8.13.1**
+- gitlab: upgrade to CE v8.13.1
+
+**8.13.0**
+- gitlab: upgrade to CE v8.13.0
+- added `GITLAB_EMAIL_SUBJECT_SUFFIX`
+
+**8.12.7**
+- gitlab: upgrade to CE v8.12.7
+
+**8.12.6**
+- gitlab: upgrade to CE v8.12.6
+
+**8.12.5**
+- gitlab: upgrade to CE v8.12.5
+
+**8.12.4**
+- gitlab: upgrade to CE v8.12.4
+
+**8.12.3**
 - gitlab: upgrade to CE v8.12.3
 
-Important:
+**Important**:
 We skipped `8.12.2` because it doesn't contain any changes. For more
 information [8.12.3 release](https://about.gitlab.com/2016/09/29/gitlab-8-12-3-released/)
 
-8.12.1
+**8.12.1**
 - gitlab: upgrade to CE v8.12.1
 
-8.12.0
+**8.12.0**
 - gitlab: upgrade to CE v8.12.0
 
-8.11.7
+**8.11.7**
 - gitlab: upgrade to CE v8.11.7
 
-8.11.6
+**8.11.6**
 - gitlab: upgrade to CE v8.11.6
 
 **8.11.5**
@@ -56,7 +90,7 @@ When you start to upgrade from `8.10-7` or below use the key of `/home/git/data/
 **8.10.3**
 - gitlab: upgrade to CE v8.10.3
 
-8.10.2-1**
+**8.10.2-1**
 - Fix `OAUTH_GOOGLE_RESTRICT_DOMAIN`
 
 **8.10.2**

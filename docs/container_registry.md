@@ -96,7 +96,7 @@ services:
 
   gitlab:
     restart: always
-    image: sameersbn/gitlab:8.12.3
+    image: sameersbn/gitlab:8.13.5
     depends_on:
     - redis
     - postgresql
@@ -157,17 +157,17 @@ services:
 
 ## Generating certificate for authentication with the registry
 
-So GitLab handles for us the authentication with Registry we need an certifcate to do that secure.
+So GitLab handles for us the authentication with Registry we need an certificate to do that secure.
 With have here two options:
 
 1. Use a signed certificate from an Trusted Certificate Authority.
 2. Self-Signed Certificate for the authentication process.
 
-### Signed Certifcate
+### Signed Certificate
 If you have a signed certificate from a Trusted Certificate Authority you need only to copy the files in then `certs` folder and mount the folder in both containers (gitlab,registry) like in the docker-compose example.
 After that you need to set an environment variable in each container.
 In the **GitLab Container** you need to set `GITLAB_REGISTRY_KEY_PATH` this is the private key of the signed certificate.
-In the **Registry Container** you need to set `REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE` to the certificate file of the signed certifcate.
+In the **Registry Container** you need to set `REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE` to the certificate file of the signed certificate.
 For more info read [token auth configuration documentation][token-config].
 
 ### Self Signed Certificate
@@ -282,7 +282,7 @@ docker stop registry gitlab && docker rm registry gitlab
 Execute the rake task with a removeable container.
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.12.3 app:rake gitlab:backup:create
+    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:create
 ```
 ## Restoring Backups
 
@@ -298,7 +298,7 @@ Execute the rake task to restore a backup. Make sure you run the container in in
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.12.3 app:rake gitlab:backup:restore
+    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:restore
 ```
 
 The list of all available backups will be displayed in reverse chronological order. Select the backup you want to restore and continue.
@@ -307,7 +307,7 @@ To avoid user interaction in the restore operation, specify the timestamp of the
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.12.3 app:rake gitlab:backup:restore BACKUP=1417624827
+    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:restore BACKUP=1417624827
 ```
 
 # Upgrading from an existing GitLab installation
@@ -318,7 +318,7 @@ If you want enable this feature for an existing instance of GitLab you need to d
 - **Step 1**: Update the docker image.
 
 ```bash
-docker pull sameersbn/gitlab:8.12.3
+docker pull sameersbn/gitlab:8.13.5
 ```
 
 - **Step 2**: Stop and remove the currently running image
@@ -370,7 +370,7 @@ docker run --name gitlab -d [PREVIOUS_OPTIONS] \
 --env 'GITLAB_REGISTRY_API_URL=http://registry:5000/' \
 --env 'GITLAB_REGISTRY_KEY_PATH=/certs/registry-auth.key' \
 --link registry:registry
-sameersbn/gitlab:8.12.3
+sameersbn/gitlab:8.13.5
 ```
 
 
