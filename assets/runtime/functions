@@ -386,6 +386,7 @@ gitlab_configure_mailroom() {
       -e "/{{IMAP_SSL}}/d" \
       -e "/{{IMAP_STARTTLS}}/d" \
       -e "/{{IMAP_MAILBOX}}/d" \
+      -e "/{{IMAP_TIMEOUT}}/d" \
       ${GITLAB_CONFIG}
   fi
 
@@ -398,7 +399,8 @@ gitlab_configure_mailroom() {
     IMAP_PORT \
     IMAP_SSL \
     IMAP_STARTTLS \
-    IMAP_MAILBOX
+    IMAP_MAILBOX \
+    IMAP_TIMEOUT
 
   # enable/disable startup of mailroom
   echo "mail_room_enabled=${GITLAB_INCOMING_EMAIL_ENABLED}" >> /etc/default/gitlab
@@ -1292,6 +1294,13 @@ migrate_database() {
       ;;
   esac
 
+  if [[ -z ${COUNT} || ${COUNT} -eq 0 ]]; then
+    echo "Setting up GitLab for firstrun. Please be patient, this could take a while..."
+    exec_as_git force=yes bundle exec rake gitlab:setup \
+      ${GITLAB_ROOT_PASSWORD:+GITLAB_ROOT_PASSWORD=$GITLAB_ROOT_PASSWORD} \
+      ${GITLAB_ROOT_EMAIL:+GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL} >/dev/null
+  fi
+
   # migrate database if the gitlab version has changed.
   CACHE_VERSION=
   [[ -f ${GITLAB_TEMP_DIR}/VERSION ]] && CACHE_VERSION=$(cat ${GITLAB_TEMP_DIR}/VERSION)
@@ -1329,13 +1338,6 @@ migrate_database() {
 
     echo "${GITLAB_VERSION}" > ${GITLAB_TEMP_DIR}/VERSION
     rm -rf ${GITLAB_TEMP_DIR}/GITLAB_RELATIVE_URL_ROOT # force cache cleanup
-  fi
-
-  if [[ -z ${COUNT} || ${COUNT} -eq 0 ]]; then
-    echo "Setting up GitLab for firstrun. Please be patient, this could take a while..."
-    exec_as_git force=yes bundle exec rake gitlab:setup \
-      ${GITLAB_ROOT_PASSWORD:+GITLAB_ROOT_PASSWORD=$GITLAB_ROOT_PASSWORD} \
-      ${GITLAB_ROOT_EMAIL:+GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL} >/dev/null
   fi
 
   # clear cache if relative_url has changed.

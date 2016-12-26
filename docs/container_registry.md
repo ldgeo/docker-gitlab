@@ -45,7 +45,7 @@ where:
 | `GITLAB_REGISTRY_API_URL ` | The internal API URL under which the Registry is exposed to. |
 | `GITLAB_REGISTRY_KEY_PATH `| The private key location that is a pair of Registry's `rootcertbundle`. Read the [token auth configuration documentation][token-config]. |
 | `GITLAB_REGISTRY_PATH `    | This should be the same directory like specified in Registry's `rootdirectory`. Read the [storage configuration documentation][storage-config]. This path needs to be readable by the GitLab user, the web-server user and the Registry user *if you use filesystem as storage configuration*. Read more in [#container-registry-storage-path](#container-registry-storage-path). |
-| `GITLAB_REGISTRY_KEY_ISSUER`  | This should be the same value as configured in Registry's `issuer`. Otherwise the authentication will not work. For more info read the [token auth configuration documentation][token-config]. |
+| `GITLAB_REGISTRY_ISSUER`  | This should be the same value as configured in Registry's `issuer`. Otherwise the authentication will not work. For more info read the [token auth configuration documentation][token-config]. |
 | `SSL_REGISTRY_KEY_PATH `    | The private key of the `SSL_REGISTRY_CERT_PATH`. This will be later used in nginx to proxy your registry via https. |
 | `SSL_REGISTRY_CERT_PATH `    | The certificate for the private key of `SSL_REGISTRY_KEY_PATH`. This will be later used in nginx to proxy your registry via https. |
 
@@ -85,7 +85,7 @@ services:
     - ./redis:/var/lib/redis:Z
   postgresql:
     restart: always
-    image: sameersbn/postgresql:9.5-1
+    image: sameersbn/postgresql:9.5-3
     volumes:
     - ./postgresql:/var/lib/postgresql:Z
     environment:
@@ -96,7 +96,7 @@ services:
 
   gitlab:
     restart: always
-    image: sameersbn/gitlab:8.13.5
+    image: sameersbn/gitlab:8.14.5
     depends_on:
     - redis
     - postgresql
@@ -282,7 +282,7 @@ docker stop registry gitlab && docker rm registry gitlab
 Execute the rake task with a removeable container.
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:create
+    sameersbn/gitlab:8.14.5 app:rake gitlab:backup:create
 ```
 ## Restoring Backups
 
@@ -298,7 +298,7 @@ Execute the rake task to restore a backup. Make sure you run the container in in
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:restore
+    sameersbn/gitlab:8.14.5 app:rake gitlab:backup:restore
 ```
 
 The list of all available backups will be displayed in reverse chronological order. Select the backup you want to restore and continue.
@@ -307,7 +307,7 @@ To avoid user interaction in the restore operation, specify the timestamp of the
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.13.5 app:rake gitlab:backup:restore BACKUP=1417624827
+    sameersbn/gitlab:8.14.5 app:rake gitlab:backup:restore BACKUP=1417624827
 ```
 
 # Upgrading from an existing GitLab installation
@@ -318,7 +318,7 @@ If you want enable this feature for an existing instance of GitLab you need to d
 - **Step 1**: Update the docker image.
 
 ```bash
-docker pull sameersbn/gitlab:8.13.5
+docker pull sameersbn/gitlab:8.14.5
 ```
 
 - **Step 2**: Stop and remove the currently running image
@@ -370,7 +370,7 @@ docker run --name gitlab -d [PREVIOUS_OPTIONS] \
 --env 'GITLAB_REGISTRY_API_URL=http://registry:5000/' \
 --env 'GITLAB_REGISTRY_KEY_PATH=/certs/registry-auth.key' \
 --link registry:registry
-sameersbn/gitlab:8.13.5
+sameersbn/gitlab:8.14.5
 ```
 
 
