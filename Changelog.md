@@ -2,6 +2,18 @@
 
 This file only reflects the changes that are made in this image. Please refer to the upstream GitLab [CHANGELOG](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/CHANGELOG.md) for the list of changes in GitLab.
 
+**8.15.1
+- gitlab: upgrade to CE v8.15.1
+
+**8.15.0**
+- gitlab: upgrade to CE v8.15.0
+- added `GITLAB_MATTERMOST_ENABLED`
+- added `GITLAB_MATTERMOST_URL`
+- added `OAUTH_AUTHENTIQ_CLIENT_ID`
+- added `OAUTH_AUTHENTIQ_CLIENT_SECRET`
+- added `OAUTH_AUTHENTIQ_SCOPE`
+- added `OAUTH_AUTHENTIQ_REDIRECT_URI`
+
 **8.14.5**
 - gitlab: upgrade to CE v8.14.5
 
