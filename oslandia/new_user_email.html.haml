@@ -24,15 +24,13 @@
 %p
   Hi #{@user['name']}!
 %p
-  This is a message from Oslandia's project management platform.
+  - if Gitlab.config.gitlab.signup_enabled
+    Your account has been created successfully.
+  - else
+    The Administrator created an account for you. Now you are a member of the company GitLab application.
 %p
-  The platform Administrator created an account for you. You can now login on the GitLab application and interact with our team.
-%p
-  Your login is :
-%p
+  login..........................................
   %code= @user['email']
-%p
-  You can click on the following link to set your password :
 
 - if @user.created_by_id
   %p
