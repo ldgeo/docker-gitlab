@@ -1,7 +1,7 @@
 [![Docker Repository on Quay.io](https://quay.io/repository/sameersbn/gitlab/status "Docker Repository on Quay.io")](https://quay.io/repository/sameersbn/gitlab)
 [![](https://images.microbadger.com/badges/image/sameersbn/gitlab.svg)](http://microbadger.com/images/sameersbn/gitlab "Get your own image badge on microbadger.com")
 
-# sameersbn/gitlab:8.16.6
+# sameersbn/gitlab:9.3.5
 
 - [Introduction](#introduction)
     - [Changelog](Changelog.md)
@@ -126,7 +126,7 @@ Automated builds of the image are available on [Dockerhub](https://hub.docker.co
 > **Note**: Builds are also available on [Quay.io](https://quay.io/repository/sameersbn/gitlab)
 
 ```bash
-docker pull sameersbn/gitlab:8.16.6
+docker pull sameersbn/gitlab:9.3.5
 ```
 
 You can also pull the `latest` tag which is built from the repository *HEAD*
@@ -195,7 +195,7 @@ docker run --name gitlab -d \
     --env 'GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alpha-numeric-string' \
     --env 'GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alpha-numeric-string' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 *Please refer to [Available Configuration Parameters](#available-configuration-parameters) to understand `GITLAB_PORT` and other configuration options*
@@ -230,7 +230,7 @@ Volumes can be mounted in docker by specifying the `-v` option in the docker run
 ```bash
 docker run --name gitlab -d \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 ## Database
@@ -263,7 +263,7 @@ docker run --name gitlab -d \
     --env 'DB_NAME=gitlabhq_production' \
     --env 'DB_USER=gitlab' --env 'DB_PASS=password' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 #### Linking to PostgreSQL Container
@@ -307,12 +307,12 @@ We are now ready to start the GitLab application.
 ```bash
 docker run --name gitlab -d --link gitlab-postgresql:postgresql \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 Here the image will also automatically fetch the `DB_NAME`, `DB_USER` and `DB_PASS` variables from the postgresql container as they are specified in the `docker run` command for the postgresql container. This is made possible using the magic of docker links and works with the following images:
 
- - [postgresql](https://hub.docker.com/_/postgresql/)
+ - [postgres](https://hub.docker.com/_/postgres/)
  - [sameersbn/postgresql](https://quay.io/repository/sameersbn/postgresql/)
  - [orchardup/postgresql](https://hub.docker.com/r/orchardup/postgresql/)
  - [paintedfox/postgresql](https://hub.docker.com/r/paintedfox/postgresql/)
@@ -361,7 +361,7 @@ docker run --name gitlab -d \
     --env 'DB_NAME=gitlabhq_production' \
     --env 'DB_USER=gitlab' --env 'DB_PASS=password' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 #### Linking to MySQL Container
@@ -404,7 +404,7 @@ We are now ready to start the GitLab application.
 ```bash
 docker run --name gitlab -d --link gitlab-mysql:mysql \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 Here the image will also automatically fetch the `DB_NAME`, `DB_USER` and `DB_PASS` variables from the mysql container as they are specified in the `docker run` command for the mysql container. This is made possible using the magic of docker links and works with the following images:
@@ -431,7 +431,7 @@ The image can be configured to use an external redis server. The configuration s
 ```bash
 docker run --name gitlab -it --rm \
     --env 'REDIS_HOST=192.168.1.100' --env 'REDIS_PORT=6379' \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 ### Linking to Redis Container
@@ -458,7 +458,7 @@ We are now ready to start the GitLab application.
 
 ```bash
 docker run --name gitlab -d --link gitlab-redis:redisio \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 ### Mail
@@ -471,7 +471,7 @@ If you are using Gmail then all you need to do is:
 docker run --name gitlab -d \
     --env 'SMTP_USER=USER@gmail.com' --env 'SMTP_PASS=PASSWORD' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 Please refer the [Available Configuration Parameters](#available-configuration-parameters) section for the list of SMTP parameters that can be specified.
@@ -491,7 +491,7 @@ docker run --name gitlab -d \
     --env 'IMAP_USER=USER@gmail.com' --env 'IMAP_PASS=PASSWORD' \
     --env 'GITLAB_INCOMING_EMAIL_ADDRESS=USER+%{key}@gmail.com' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 Please refer the [Available Configuration Parameters](#available-configuration-parameters) section for the list of IMAP parameters that can be specified.
@@ -568,7 +568,7 @@ docker run --name gitlab -d \
     --env 'GITLAB_SSH_PORT=10022' --env 'GITLAB_PORT=10443' \
     --env 'GITLAB_HTTPS=true' --env 'SSL_SELF_SIGNED=true' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 In this configuration, any requests made over the plain http protocol will automatically be redirected to use the https protocol. However, this is not optimal when using a load balancer.
@@ -584,7 +584,7 @@ docker run --name gitlab -d \
  --env 'GITLAB_HTTPS=true' --env 'SSL_SELF_SIGNED=true' \
  --env 'NGINX_HSTS_MAXAGE=2592000' \
  --volume /srv/docker/gitlab/gitlab:/home/git/data \
- sameersbn/gitlab:8.16.6
+ sameersbn/gitlab:9.3.5
 ```
 
 If you want to completely disable HSTS set `NGINX_HSTS_ENABLED` to `false`.
@@ -607,7 +607,7 @@ docker run --name gitlab -d \
     --env 'GITLAB_SSH_PORT=10022' --env 'GITLAB_PORT=443' \
     --env 'GITLAB_HTTPS=true' --env 'SSL_SELF_SIGNED=true' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 Again, drop the `--env 'SSL_SELF_SIGNED=true'` option if you are using CA certified SSL certificates.
@@ -655,7 +655,7 @@ Let's assume we want to deploy our application to '/git'. GitLab needs to know t
 docker run --name gitlab -it --rm \
     --env 'GITLAB_RELATIVE_URL_ROOT=/git' \
     --volume /srv/docker/gitlab/gitlab:/home/git/data \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 GitLab will now be accessible at the `/git` path, e.g. `http://www.example.com/git`.
@@ -783,14 +783,14 @@ Also the container processes seem to be executed as the host's user/group `1000`
 ```bash
 docker run --name gitlab -it --rm [options] \
     --env "USERMAP_UID=$(id -u git)" --env "USERMAP_GID=$(id -g git)" \
-    sameersbn/gitlab:8.16.6
+    sameersbn/gitlab:9.3.5
 ```
 
 When changing this mapping, all files and directories in the mounted data volume `/home/git/data` have to be re-owned by the new ids. This can be achieved automatically using the following command:
 
 ```bash
 docker run --name gitlab -d [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:sanitize
+    sameersbn/gitlab:9.3.5 app:sanitize
 ```
 
 ### Piwik
@@ -817,7 +817,7 @@ Below is the complete list of available options that can be used to customize yo
 | `GITLAB_SECRETS_SECRET_KEY_BASE` | Encryption key for session secrets. Ensure that your key is at least 64 characters long and that you don't lose it. This secret can be rotated with minimal impact - the main effect is that previously-sent password reset emails will no longer work. You can generate one using `pwgen -Bsv1 64`. No defaults. |
 | `GITLAB_SECRETS_OTP_KEY_BASE` |  Encryption key for OTP related stuff with  GitLab. Ensure that your key is at least 64 characters long and that you don't lose it. **If you lose or change this secret, 2FA will stop working for all users.** You can generate one using `pwgen -Bsv1 64`. No defaults. |
 | `GITLAB_TIMEZONE` | Configure the timezone for the gitlab application. This configuration does not effect cron jobs. Defaults to `UTC`. See the list of [acceptable values](http://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html). |
-| `GITLAB_ROOT_PASSWORD` | The password for the root user on firstrun. Defaults to `5iveL!fe`. |
+| `GITLAB_ROOT_PASSWORD` | The password for the root user on firstrun. Defaults to `5iveL!fe`. GitLab requires this to be at least **8 characters long**. |
 | `GITLAB_ROOT_EMAIL` | The email for the root user on firstrun. Defaults to `admin@example.com` |
 | `GITLAB_EMAIL` | The email address for the GitLab server. Defaults to value of `SMTP_USER`, else defaults to `example@example.com`. |
 | `GITLAB_EMAIL_DISPLAY_NAME` | The name displayed in emails sent out by the GitLab mailer. Defaults to `GitLab`. |
@@ -848,6 +848,7 @@ Below is the complete list of available options that can be used to customize yo
 | `GITLAB_SHARED_DIR` | The directory to store the build artifacts. Defaults to `/home/git/data/shared` |
 | `GITLAB_ARTIFACTS_ENABLED` | Enable/Disable GitLab artifacts support. Defaults to `true`. |
 | `GITLAB_ARTIFACTS_DIR` | Directory to store the artifacts. Defaults to `$GITLAB_SHARED_DIR/artifacts` |
+| `GITLAB_PIPELINE_SCHEDULE_WORKER_CRON` | Cron notation for the Gitlab pipeline schedule worker. Defaults to `'0 */12 * * *'` |
 | `GITLAB_LFS_ENABLED` | Enable/Disable Git LFS support. Defaults to `true`. |
 | `GITLAB_LFS_OBJECTS_DIR` | Directory to store the lfs-objects. Defaults to `$GITLAB_SHARED_DIR/lfs-objects` |
 | `GITLAB_MATTERMOST_ENABLED` | Enable/Disable GitLab Mattermost for *Add Mattermost button*. Defaults to `false`. |
@@ -869,6 +870,13 @@ Below is the complete list of available options that can be used to customize yo
 | `GITLAB_REGISTRY_KEY_PATH` | Sets the GitLab Registry Key Path. Defaults to `config/registry.key` |
 | `GITLAB_REGISTRY_DIR` | Directory to store the container images will be shared with registry. Defaults to `$GITLAB_SHARED_DIR/registry` |
 | `GITLAB_REGISTRY_ISSUER` | Sets the GitLab Registry Issuer. Defaults to `gitlab-issuer`. |
+| `GITLAB_PAGES_ENABLED` | Enables the GitLab Pages. Defaults to `false`. |
+| `GITLAB_PAGES_DOMAIN` | Sets the GitLab Pages Domain. Defaults to `example.com` |
+| `GITLAB_PAGES_DIR` | Sets GitLab Pages directory where all pages will be stored. Defaults to `$GITLAB_SHARED_DIR/pages` |
+| `GITLAB_PAGES_PORT`| Sets GitLab Pages Port that will be used in NGINX. Defaults to `80` |
+| `GITLAB_PAGES_HTTPS` | Sets GitLab Pages to HTTPS and the gitlab-pages-ssl config will be used. Defaults to `false` |
+| `GITLAB_PAGES_EXTERNAL_HTTP` | Sets GitLab Pages external http to receive request on an independen port. Disabled by default |
+| `GITLAB_PAGES_EXTERNAL_HTTPS` | Sets GitLab Pages external https to receive request on an independen port. Disabled by default |
 | `GITLAB_HTTPS` | Set to `true` to enable https support, disabled by default. |
 | `SSL_SELF_SIGNED` | Set to `true` when using self signed ssl certificates. `false` by default. |
 | `SSL_CERTIFICATE_PATH` | Location of the ssl certificate. Defaults to `/home/git/data/certs/gitlab.crt` |
@@ -878,6 +886,8 @@ Below is the complete list of available options that can be used to customize yo
 | `SSL_CA_CERTIFICATES_PATH` | List of SSL certificates to trust. Defaults to `/home/git/data/certs/ca.crt`. |
 | `SSL_REGISTRY_KEY_PATH` | Location of the ssl private key for gitlab container registry. Defaults to `/home/git/data/certs/registry.key` |
 | `SSL_REGISTRY_CERT_PATH` | Location of the ssl certificate for the gitlab container registry. Defaults to `/home/git/data/certs/registry.crt` |
+| `SSL_PAGES_KEY_PATH` | Location of the ssl private key for gitlab pages. Defaults to `/home/git/data/certs/pages.key` |
+| `SSL_PAGES_CERT_PATH` | Location of the ssl certificate for the gitlab pages. Defaults to `/home/git/data/certs/pages.crt` |
 | `SSL_CIPHERS` | List of supported SSL ciphers: Defaults to `ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4` |
 | `NGINX_WORKERS` | The number of nginx workers to start. Defaults to `1`. |
 | `NGINX_SERVER_NAMES_HASH_BUCKET_SIZE` | Sets the bucket size for the server names hash tables. This is needed when you have long server_names or your an error message from nginx like *nginx: [emerg] could not build server_names_hash, you should increase server_names_hash_bucket_size:..*. It should be only increment by a power of 2. Defaults to `32`. |
@@ -896,6 +906,7 @@ Below is the complete list of available options that can be used to customize yo
 | `SIDEKIQ_MEMORY_KILLER_MAX_RSS` | Non-zero value enables the SidekiqMemoryKiller. Defaults to `1000000`. For additional options refer [Configuring the MemoryKiller](http://doc.gitlab.com/ce/operations/sidekiq_memory_killer.html) |
 | `DB_ADAPTER` | The database type. Possible values: `mysql2`, `postgresql`. Defaults to `postgresql`. |
 | `DB_ENCODING` | The database encoding. For `DB_ADAPTER` values `postresql` and `mysql2`, this parameter defaults to `unicode` and `utf8` respectively. |
+| `DB_COLLATION` | The database collation. Defaults to `utf8_general_ci` for `DB_ADAPTER` `mysql2`. This parameter is not supported for `DB_ADAPTER` `postresql` and will be removed. |
 | `DB_HOST` | The database server hostname. Defaults to `localhost`. |
 | `DB_PORT` | The database server port. Defaults to `3306` for mysql and `5432` for postgresql. |
 | `DB_NAME` | The database database name. Defaults to `gitlabhq_production` |
@@ -1000,6 +1011,7 @@ Below is the complete list of available options that can be used to customize yo
 | `PIWIK_SITE_ID` | Sets the Piwik site ID. No defaults. |
 | `AWS_BACKUPS` | Enables automatic uploads to an Amazon S3 instance. Defaults to `false`. |
 | `AWS_BACKUP_REGION` | AWS region. No defaults. |
+| `AWS_BACKUP_ENDPOINT` | AWS endpoint. No defaults. |
 | `AWS_BACKUP_ACCESS_KEY_ID` | AWS access key id. No defaults. |
 | `AWS_BACKUP_SECRET_ACCESS_KEY` | AWS secret access key. No defaults. |
 | `AWS_BACKUP_BUCKET` | AWS bucket for backup uploads. No defaults. |
@@ -1032,7 +1044,7 @@ Execute the rake task to create a backup.
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:backup:create
+    sameersbn/gitlab:9.3.5 app:rake gitlab:backup:create
 ```
 
 A backup will be created in the backups folder of the [Data Store](#data-store). You can change the location of the backups using the `GITLAB_BACKUP_DIR` configuration parameter.
@@ -1060,14 +1072,14 @@ you need to prepare the database:
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.14.4 app:rake db:setup
+    sameersbn/gitlab:9.3.5 app:rake db:setup
 ```
 
 Execute the rake task to restore a backup. Make sure you run the container in interactive mode `-it`.
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:backup:restore
+    sameersbn/gitlab:9.3.5 app:rake gitlab:backup:restore
 ```
 
 The list of all available backups will be displayed in reverse chronological order. Select the backup you want to restore and continue.
@@ -1076,7 +1088,7 @@ To avoid user interaction in the restore operation, specify the timestamp of the
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:backup:restore BACKUP=1417624827
+    sameersbn/gitlab:9.3.5 app:rake gitlab:backup:restore BACKUP=1417624827
 ```
 
 When using `docker-compose` you may use the following command to execute the restore.
@@ -1106,6 +1118,8 @@ The image can be configured to automatically upload the backups to an AWS S3 buc
 
 More details about the appropriate IAM user properties can found on [doc.gitlab.com](http://doc.gitlab.com/ce/raketasks/backup_restore.html#upload-backups-to-remote-cloud-storage)
 
+For remote backup to selfhosted s3 compatible storage, use `AWS_BACKUP_ENDPOINT`.
+
 AWS uploads are performed alongside normal backups, both through the appropriate `app:rake` command and when an automatic backup is performed.
 
 ### Google Cloud Storage (GCS) Remote Backups
@@ -1123,7 +1137,7 @@ The `app:rake` command allows you to run gitlab rake tasks. To run a rake task s
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:env:info
+    sameersbn/gitlab:9.3.5 app:rake gitlab:env:info
 ```
 
 You can also use `docker exec` to run raketasks on running gitlab instance. For example,
@@ -1136,7 +1150,7 @@ Similarly, to import bare repositories into GitLab project instance
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:import:repos
+    sameersbn/gitlab:9.3.5 app:rake gitlab:import:repos
 ```
 
 Or
@@ -1167,7 +1181,7 @@ Copy all the **bare** git repositories to the `repositories/` directory of the [
 
 ```bash
 docker run --name gitlab -it --rm [OPTIONS] \
-    sameersbn/gitlab:8.16.6 app:rake gitlab:import:repos
+    sameersbn/gitlab:9.3.5 app:rake gitlab:import:repos
 ```
 
 Watch the logs and your repositories should be available into your new gitlab container.
@@ -1189,12 +1203,12 @@ To upgrade to newer gitlab releases, simply follow this 4 step upgrade procedure
 
 > **Note**
 >
-> Upgrading to `sameersbn/gitlab:8.16.6` from `sameersbn/gitlab:7.x.x` can cause issues. It is therefore required that you first upgrade to `sameersbn/gitlab:8.0.5-1` before upgrading to `sameersbn/gitlab:8.1.0` or higher.
+> Upgrading to `sameersbn/gitlab:9.3.5` from `sameersbn/gitlab:7.x.x` can cause issues. It is therefore required that you first upgrade to `sameersbn/gitlab:8.0.5-1` before upgrading to `sameersbn/gitlab:8.1.0` or higher.
 
 - **Step 1**: Update the docker image.
 
 ```bash
-docker pull sameersbn/gitlab:8.16.6
+docker pull sameersbn/gitlab:9.3.5
 ```
 
 - **Step 2**: Stop and remove the currently running image
@@ -1220,7 +1234,7 @@ Replace `x.x.x` with the version you are upgrading from. For example, if you are
 > **Note**: Since GitLab `8.11.0` you need to provide the `GITLAB_SECRETS_SECRET_KEY_BASE` and `GITLAB_SECRETS_OTP_KEY_BASE` parameters while starting the image. These should initially both have the same value as the contents of the `/home/git/data/.secret` file. See [Available Configuration Parameters](#available-configuration-parameters) for more information on these parameters.
 
 ```bash
-docker run --name gitlab -d [OPTIONS] sameersbn/gitlab:8.16.6
+docker run --name gitlab -d [OPTIONS] sameersbn/gitlab:9.3.5
 ```
 
 ## Shell Access
