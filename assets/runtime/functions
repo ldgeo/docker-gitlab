@@ -282,8 +282,21 @@ gitlab_configure_gitaly() {
     GITLAB_REPOS_DIR
 
   update_template ${GITLAB_CONFIG} \
-    GITALY_ENABLED
-  
+    GITALY_ENABLED \
+    GITALY_TOKEN
+
+}
+
+gitlab_configure_monitoring() {
+  echo "Configuring gitlab::monitoring..."
+
+  update_template ${GITLAB_CONFIG} \
+    GITLAB_MONITORING_UNICORN_SAMPLER_INTERVAL \
+    GITLAB_MONITORING_IP_WHITELIST \
+    GITLAB_MONITORING_SIDEKIQ_EXPORTER_ENABLED \
+    GITLAB_MONITORING_SIDEKIQ_EXPORTER_ADDRESS \
+    GITLAB_MONITORING_SIDEKIQ_EXPORTER_PORT
+
 }
 
 gitlab_configure_gitlab_workhorse() {
@@ -710,6 +723,18 @@ gitlab_configure_secrets() {
   GITLAB_SECRETS_DB_KEY_BASE \
   GITLAB_SECRETS_SECRET_KEY_BASE \
   GITLAB_SECRETS_OTP_KEY_BASE
+
+  local shell_secret="${GITLAB_INSTALL_DIR}/.gitlab_shell_secret"
+  if [[ ! -f "${shell_secret}" ]]; then
+    exec_as_git openssl rand -hex -out "${shell_secret}" 16
+    chmod 600 "${shell_secret}"
+  fi
+
+  local workhorse_secret="${GITLAB_INSTALL_DIR}/.gitlab_workhorse_secret"
+  if [[ ! -f "${workhorse_secret}" ]]; then
+    exec_as_git openssl rand -base64 -out "${workhorse_secret}" 32
+    chmod 600 "${workhorse_secret}"
+  fi
 }
 
 gitlab_configure_sidekiq() {
@@ -844,7 +869,7 @@ gitlab_configure_gravatar() {
 
 gitlab_configure_cron_jobs() {
   echo "Configuring gitlab::cron_jobs..."
-  
+
   if [[ -n "${GITLAB_PIPELINE_SCHEDULE_WORKER_CRON}" ]]; then
     update_template ${GITLAB_CONFIG} GITLAB_PIPELINE_SCHEDULE_WORKER_CRON
   else
@@ -1022,6 +1047,21 @@ nginx_configure_gitlab_hsts() {
    fi
  }
 
+nginx_configure_gitlab_real_ip() {
+  if [[ ${NGINX_REAL_IP_RECURSIVE} == on && \
+     -n ${NGINX_REAL_IP_TRUSTED_ADDRESSES} ]]; then
+    echo "Configuring nginx::gitlab::real_ip..."
+    update_template ${GITLAB_NGINX_CONFIG} \
+      NGINX_REAL_IP_RECURSIVE \
+      NGINX_REAL_IP_TRUSTED_ADDRESSES
+  else
+    NGINX_REAL_IP_RECURSIVE="off"
+    update_template ${GITLAB_NGINX_CONFIG} \
+      NGINX_REAL_IP_RECURSIVE
+    sed -i "/{{NGINX_REAL_IP_TRUSTED_ADDRESSES}}/d" ${GITLAB_NGINX_CONFIG}
+  fi
+}
+
 nginx_configure_gitlab() {
   echo "Configuring nginx::gitlab..."
   update_template ${GITLAB_NGINX_CONFIG} \
@@ -1036,6 +1076,7 @@ nginx_configure_gitlab() {
   nginx_configure_gitlab_ssl
   nginx_configure_gitlab_hsts
   nginx_configure_gitlab_ipv6
+  nginx_configure_gitlab_real_ip
 }
 
 nginx_configure_gitlab_ci() {
@@ -1381,6 +1422,10 @@ configure_gitlab() {
     GITLAB_SHELL_INSTALL_DIR \
     GITLAB_DATA_DIR \
     GITLAB_REPOS_DIR \
+    GITLAB_REPOSITORIES_STORAGES_DEFAULT_FAILURE_COUNT_THRESHOLD \
+    GITLAB_REPOSITORIES_STORAGES_DEFAULT_FAILURE_WAIT_TIME \
+    GITLAB_REPOSITORIES_STORAGES_DEFAULT_FAILURE_RESET_TIME \
+    GITLAB_REPOSITORIES_STORAGES_DEFAULT_STORAGE_TIMEOUT \
     GITLAB_DOWNLOADS_DIR \
     GITLAB_SHARED_DIR \
     GITLAB_HOST \
@@ -1401,6 +1446,7 @@ configure_gitlab() {
   gitlab_configure_secrets
   gitlab_configure_sidekiq
   gitlab_configure_gitaly
+  gitlab_configure_monitoring
   gitlab_configure_gitlab_workhorse
   gitlab_configure_relative_url
   gitlab_configure_trusted_proxies
